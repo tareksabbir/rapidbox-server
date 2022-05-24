@@ -54,25 +54,17 @@ async function run() {
             res.send(tools);
 
         })
+        app.post('/tools', async (req, res) => {
+            const newProduct = req.body;
+            const result = await toolsCollection.insertOne(newProduct)
+            res.send(result);
+        })
+
 
 
         app.get('/user', async (req, res) => {
             const users = await usersCollection.find().toArray();
             res.send(users);
-        })
-
-        app.get('/review', async (req, res) => {
-            const query = {};
-            const cursor = reviewCollection.find(query);
-            const reviews = await cursor.toArray();
-            res.send(reviews)
-
-        })
-
-        app.post('/review', async (req, res) => {
-            const newReview = req.body;
-            const result = await reviewCollection.insertOne(newReview);
-            res.send(result);
         })
 
         app.put('/user/:email', async (req, res) => {
@@ -87,6 +79,20 @@ async function run() {
             const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
             res.send({ result, token });
 
+        })
+
+        app.get('/review', async (req, res) => {
+            const query = {};
+            const cursor = reviewCollection.find(query);
+            const reviews = await cursor.toArray();
+            res.send(reviews)
+
+        })
+
+        app.post('/review', async (req, res) => {
+            const newReview = req.body;
+            const result = await reviewCollection.insertOne(newReview);
+            res.send(result);
         })
 
 
