@@ -2,7 +2,8 @@ const express = require('express')
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
 
 const app = express()
 const port = process.env.PORT || 5000;
@@ -37,6 +38,7 @@ async function run() {
         await client.connect();
         const toolsCollection = client.db('rapidbox').collection('tools');
         const usersCollection = client.db('rapidbox').collection('users');
+        const reviewCollection = client.db('rapidbox').collection('reviews');
 
         app.get('/tools', async (req, res) => {
             const query = {};
@@ -45,9 +47,32 @@ async function run() {
             res.send(tools);
         })
 
+        app.get("/tools/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const tools = await toolsCollection.findOne(query);
+            res.send(tools);
+
+        })
+
+
         app.get('/user', async (req, res) => {
             const users = await usersCollection.find().toArray();
             res.send(users);
+        })
+
+        app.get('/review', async (req, res) => {
+            const query = {};
+            const cursor = reviewCollection.find(query);
+            const reviews = await cursor.toArray();
+            res.send(reviews)
+
+        })
+
+        app.post('/review', async (req, res) => {
+            const newReview = req.body;
+            const result = await reviewCollection.insertOne(newReview);
+            res.send(result);
         })
 
         app.put('/user/:email', async (req, res) => {
