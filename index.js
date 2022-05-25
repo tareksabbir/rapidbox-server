@@ -68,13 +68,13 @@ async function run() {
             res.send(users);
         })
 
-        // app.get("/user/:email", async (req, res) => {
-        //     const email = req.params.email;
-        //     const query = { email: email }
-        //     const users = await usersCollection.findOne(query);
-        //     res.send(users);
+        app.get("/user/:email", async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const users = await usersCollection.findOne(query);
+            res.send(users);
 
-        // })
+        })
 
 
         app.put('/user/:email', async (req, res) => {
@@ -101,7 +101,7 @@ async function run() {
                     gender: updatedProfile.gender,
                     education: updatedProfile.education,
                     photoURL: updatedProfile.photoURL,
-                    company: updatedProfile.photoURL,
+                    company: updatedProfile.company,
                     about: updatedProfile.about,
                 }
             };
