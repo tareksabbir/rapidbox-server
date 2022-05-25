@@ -62,27 +62,42 @@ async function run() {
 
 
 
+
         app.get('/user', async (req, res) => {
             const users = await usersCollection.find().toArray();
             res.send(users);
         })
 
-        app.get("/user/:email", async (req, res) => {
+        // app.get("/user/:email", async (req, res) => {
+        //     const email = req.params.email;
+        //     const query = { email: email }
+        //     const users = await usersCollection.findOne(query);
+        //     res.send(users);
+
+        // })
+
+
+        app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
-            const query = { email: email }
-            const users = await usersCollection.findOne(query);
-            res.send(users);
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+            res.send({ result, token });
 
         })
 
-        app.put('/user/:email', async (req, res) => {
+        app.patch('/user/:email', async (req, res) => {
             const email = req.params.email;
             const updatedProfile = req.body;
             const filter = { email: email };
             const options = { upsert: true };
             const updatedDoc = {
                 $set: {
-                    user,
                     gender: updatedProfile.gender,
                     education: updatedProfile.education,
                     photoURL: updatedProfile.photoURL,
@@ -91,10 +106,7 @@ async function run() {
                 }
             };
             const result = await usersCollection.updateOne(filter, updatedDoc, options);
-            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
-            res.send({ result, token });
-
-
+            res.send(result);
         })
 
         app.get('/review', async (req, res) => {
