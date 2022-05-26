@@ -39,6 +39,7 @@ async function run() {
         const toolsCollection = client.db('rapidbox').collection('tools');
         const usersCollection = client.db('rapidbox').collection('users');
         const reviewCollection = client.db('rapidbox').collection('reviews');
+        const orderCollection = client.db('rapidbox').collection('orders');
 
         app.get('/tools', async (req, res) => {
             const query = {};
@@ -66,9 +67,6 @@ async function run() {
             res.send(result);
         })
 
-
-
-
         app.get('/user', async (req, res) => {
             const users = await usersCollection.find().toArray();
             res.send(users);
@@ -81,7 +79,6 @@ async function run() {
             res.send(users);
 
         })
-
 
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
@@ -110,6 +107,7 @@ async function run() {
                     photoURL: updatedProfile.photoURL,
                     company: updatedProfile.company,
                     about: updatedProfile.about,
+                    address: updatedProfile.address,
                 }
             };
             const result = await usersCollection.updateOne(filter, updatedDoc, options);
@@ -139,7 +137,13 @@ async function run() {
                 return res.status(403).send({ message: 'Forbidden Access' })
             }
 
+        })
 
+        app.delete('/user/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await usersCollection.deleteOne(query);
+            res.send(result);
         })
 
 
@@ -154,6 +158,26 @@ async function run() {
         app.post('/review', async (req, res) => {
             const newReview = req.body;
             const result = await reviewCollection.insertOne(newReview);
+            res.send(result);
+        })
+        app.get('/order', async (req, res) => {
+            const query = {};
+            const cursor = orderCollection.find(query);
+            const orders = await cursor.toArray();
+            res.send(orders)
+
+        })
+
+        app.get('/order/buyer', async (req, res) => {
+            const buyerEmail = req.query.buyerEmail;
+            const query = { buyerEmail: buyerEmail };
+            const order = await orderCollection.find(query).toArray();
+            res.send(order)
+        })
+
+        app.post('/order', async (req, res) => {
+            const newOrder = req.body;
+            const result = await orderCollection.insertOne(newOrder);
             res.send(result);
         })
 
