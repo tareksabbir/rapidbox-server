@@ -168,16 +168,23 @@ async function run() {
 
         })
 
+
         app.get('/order/buyer', async (req, res) => {
             const buyerEmail = req.query.buyerEmail;
             const query = { buyerEmail: buyerEmail };
-            const order = await orderCollection.find(query).toArray();
-            res.send(order)
+            const neworder = await orderCollection.find(query).toArray();
+            res.send(neworder)
         })
 
         app.post('/order', async (req, res) => {
             const newOrder = req.body;
             const result = await orderCollection.insertOne(newOrder);
+            res.send(result);
+        })
+        app.get("/order/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await orderCollection.findOne(query);
             res.send(result);
         })
 
