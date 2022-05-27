@@ -205,6 +205,8 @@ async function run() {
                 $set: {
                     paid: true,
                     transactionId: payment.transactionId,
+                    status: false
+
                 }
             };
             const result = await paymentCollection.insertOne(payment);
@@ -212,6 +214,8 @@ async function run() {
             res.send(updatedDoc);
 
         })
+
+
 
         app.post("/create-payment-intent", async (req, res) => {
             const order = req.body;
