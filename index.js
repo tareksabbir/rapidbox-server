@@ -40,19 +40,8 @@ async function run() {
         const usersCollection = client.db('rapidbox').collection('users');
         const reviewCollection = client.db('rapidbox').collection('reviews');
         const orderCollection = client.db('rapidbox').collection('orders');
+        const paymentCollection = client.db('rapidbox').collection('payments');
 
-        // app.post('/create-payment-intent', verifyJWT, async (req, res) => {
-        //     const order = req.body;
-        //     const price = order.price;
-        //     const amount = parseInt(price) * 100;
-        //     console.log(order);
-        //     const paymentIntent = await stripe.paymentIntents.create({
-        //         amount: amount,
-        //         currency: 'usd',
-        //         payment_method_types: ['card']
-        //     });
-        //     res.send({ clientSecret: paymentIntent.client_secret })
-        // });
 
         app.get('/tools', async (req, res) => {
             const query = {};
@@ -194,11 +183,34 @@ async function run() {
             const result = await orderCollection.insertOne(newOrder);
             res.send(result);
         })
+
+        app.delete('/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await orderCollection.deleteOne(query);
+            res.send(result);
+        })
+
         app.get("/order/:id", async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const result = await orderCollection.findOne(query);
             res.send(result);
+        })
+        app.patch("/order/:id", async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId,
+                }
+            };
+            const result = await paymentCollection.insertOne(payment);
+            const updatedOrder = await orderCollection.updateOne(filter, updatedDoc);
+            res.send(updatedDoc);
+
         })
 
         app.post("/create-payment-intent", async (req, res) => {
