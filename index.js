@@ -3,7 +3,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express()
 const port = process.env.PORT || 5000;
@@ -40,6 +40,19 @@ async function run() {
         const usersCollection = client.db('rapidbox').collection('users');
         const reviewCollection = client.db('rapidbox').collection('reviews');
         const orderCollection = client.db('rapidbox').collection('orders');
+
+        // app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+        //     const order = req.body;
+        //     const price = order.price;
+        //     const amount = parseInt(price) * 100;
+        //     console.log(order);
+        //     const paymentIntent = await stripe.paymentIntents.create({
+        //         amount: amount,
+        //         currency: 'usd',
+        //         payment_method_types: ['card']
+        //     });
+        //     res.send({ clientSecret: paymentIntent.client_secret })
+        // });
 
         app.get('/tools', async (req, res) => {
             const query = {};
@@ -187,6 +200,24 @@ async function run() {
             const result = await orderCollection.findOne(query);
             res.send(result);
         })
+
+        app.post("/create-payment-intent", async (req, res) => {
+            const order = req.body;
+            const bill = order.bill;
+            const amount = parseInt(bill) * 100;
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+            res.send({ clientSecret: paymentIntent.client_secret })
+
+        });
+
+
+
+
 
 
     } finally {
